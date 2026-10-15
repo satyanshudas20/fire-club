@@ -1,0 +1,10 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>Club settings</h1><p>Branding and contact details shown across the app and public page.</p></div></div>
+<form class="card form-grid" method="post" action="/admin/settings" style="max-width:820px"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="field"><label>Club name</label><input class="input" name="club_name" value="<%= club.club_name %>" required maxlength="60"></div>
+  <div class="field"><label>Contact email</label><input class="input" type="email" name="contact_email" value="<%= club.contact_email %>"></div>
+  <div class="field full"><label>Tagline</label><input class="input" name="tagline" value="<%= club.tagline %>" maxlength="140"></div>
+  <div class="field full"><label>Home location</label><input class="input" name="location" value="<%= club.location %>"></div>
+  <div class="field full"><label>About (shown on home page)</label><textarea name="about" maxlength="800"><%= club.about %></textarea></div>
+  <div class="full"><button class="btn">Save settings</button></div></form>
+<%- include('../partials/bottom') %>

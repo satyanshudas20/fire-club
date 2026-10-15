@@ -1,0 +1,15 @@
+<%- include('../partials/top') %>
+<div class="page-head"><h1><%= e.id ? 'Edit event' : 'New event' %></h1></div>
+<% if (typeof error !== 'undefined' && error) { %><div class="err"><%= error %></div><% } %>
+<form class="card form-grid" method="post" action="<%= action %>" style="max-width:820px"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+  <div class="field full"><label>Title</label><input class="input" name="title" value="<%= e.title || '' %>" required maxlength="120"></div>
+  <div class="field"><label>Starts</label><input class="input" type="datetime-local" name="starts_at" value="<%= (e.starts_at || '').slice(0, 16) %>" required></div>
+  <div class="field"><label>Ends</label><input class="input" type="datetime-local" name="ends_at" value="<%= (e.ends_at || '').slice(0, 16) %>"></div>
+  <div class="field"><label>Location</label><input class="input" name="location" value="<%= e.location || '' %>"></div>
+  <div class="field"><label>Category</label><select name="category"><% CATS.forEach(c => { %><option <%= e.category === c ? 'selected' : '' %>><%= c %></option><% }) %></select></div>
+  <div class="field"><label>Capacity <small>(0 = unlimited)</small></label><input class="input" type="number" min="0" name="capacity" value="<%= e.capacity || 0 %>"></div>
+  <div class="field" style="align-self:end"><label class="check"><input type="checkbox" name="members_only" <%= e.members_only ? 'checked' : '' %>> Paid members only</label></div>
+  <div class="field full"><label>Description</label><textarea name="description" maxlength="2000"><%= e.description || '' %></textarea></div>
+  <div class="full row"><button class="btn">Save event</button><a class="btn ghost" href="/events">Cancel</a></div>
+</form>
+<%- include('../partials/bottom') %>

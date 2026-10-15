@@ -1,0 +1,9 @@
+<header class="pubnav <%= typeof over !== 'undefined' && over ? 'over' : '' %>">
+  <a href="/" class="brand"><span class="logo"><%- icon('flame', 22) %></span><%= club.club_name %></a>
+  <button class="btn ghost sm pub-menu-btn" id="pub-menu-btn" aria-label="Open navigation menu" aria-controls="pub-navigation" aria-expanded="false"><%- icon('menu') %></button>
+  <nav id="pub-navigation">
+    <button class="btn ghost sm" id="theme-toggle" aria-label="Toggle dark mode"><%- icon('moon') %></button>
+    <a class="btn ghost" href="/login">Sign in</a>
+    <a class="btn" href="/signup">Join the club</a>
+  </nav>
+</header>

@@ -1,0 +1,30 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>Safety & training</h1><p>Certifications keep everyone safe. Required courses must be valid to join fire activities.</p></div></div>
+<div class="grid g2">
+<% courses.forEach(c => { const s = status[c.id]; const exp = s && s.expires_at && s.expires_at < today; const isSoon = s && !exp && s.expires_at && s.expires_at <= soon; %>
+  <div class="card"><div class="row between"><h2 style="margin:0"><%= c.title %></h2><span class="badge <%= c.required ? 'bad' : 'mute' %>"><%= c.required ? 'Required' : c.level %></span></div>
+    <p class="muted"><%= c.description %></p>
+    <div class="row between"><small><%= c.holders %> valid holders · valid <%= c.valid_months ? c.valid_months + ' months' : 'forever' %></small>
+      <% if (s) { %><span class="badge <%= exp ? 'bad' : isSoon ? 'warn' : '' %>"><%= exp ? 'Expired ' + fmtDate(s.expires_at) : 'You: valid' + (s.expires_at ? ' to ' + fmtDate(s.expires_at) : '') %></span><% } else { %><span class="badge mute">Not yet earned</span><% } %></div>
+    <% if (isOfficer) { %><form method="post" action="/training/courses/<%= c.id %>/delete" class="mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn danger sm" data-confirm="Delete this course and all certifications for it?">Delete course</button></form><% } %></div>
+<% }) %></div>
+<% if (isOfficer) { %>
+<div class="grid g2 mt">
+  <form class="card" method="post" action="/training/award"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><h2><%- icon('check') %> Award a certification</h2>
+    <div class="field"><label>Member</label><select name="user_id"><% members.forEach(m => { %><option value="<%= m.id %>"><%= m.name %></option><% }) %></select></div>
+    <div class="field"><label>Course</label><select name="course_id"><% courses.forEach(c => { %><option value="<%= c.id %>"><%= c.title %></option><% }) %></select></div>
+    <button class="btn">Award (expiry set automatically)</button></form>
+  <form class="card" method="post" action="/training/courses"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><h2><%- icon('plus') %> New course</h2>
+    <div class="field"><label>Title</label><input class="input" name="title" required></div>
+    <div class="field"><label>Description</label><input class="input" name="description"></div>
+    <div class="row"><select name="level" style="width:auto"><option>Beginner</option><option>Intermediate</option><option>Advanced</option></select>
+      <input class="input" type="number" name="valid_months" value="12" min="0" style="width:90px" aria-label="Valid months"><small>months valid (0 = never)</small>
+      <label class="check"><input type="checkbox" name="required"> Required</label></div><button class="btn mt">Create course</button></form>
+</div>
+<div class="card mt"><h2>Certification roster</h2><div class="table-wrap"><table><thead><tr><th>Member</th><th>Course</th><th>Awarded</th><th>Expires</th><th></th></tr></thead><tbody>
+<% roster.forEach(c => { const exp = c.expires_at && c.expires_at < today; const sn = c.expires_at && !exp && c.expires_at <= soon; %>
+  <tr><td><%= c.user_name %></td><td><%= c.title %></td><td><%= fmtDate(c.awarded_at) %></td><td><span class="badge <%= exp ? 'bad' : sn ? 'warn' : '' %>"><%= c.expires_at ? fmtDate(c.expires_at) : 'Never' %></span></td>
+  <td class="right"><form method="post" action="/training/certs/<%= c.id %>/revoke"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn danger sm" data-confirm="Revoke this certification?">Revoke</button></form></td></tr><% }) %>
+</tbody></table></div></div>
+<% } %>
+<%- include('../partials/bottom') %>

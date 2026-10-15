@@ -1,0 +1,17 @@
+<%- include('../partials/top') %>
+<div class="auth-wrap">
+  <div class="auth-art"><div><%- icon('flame', 180) %><h1 class="mt" style="color:#fff"><%= club.club_name %></h1><p><%= club.tagline %></p></div></div>
+  <div class="auth-form"><div class="box">
+    <a href="/" class="muted">← Back to home</a>
+    <h1 class="mt">Welcome back</h1><p class="muted">Sign in to your club account.</p>
+    <form method="post" action="/login">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>"><input type="hidden" name="next" value="<%= next %>">
+      <div class="field"><label for="email">Email</label><input class="input" id="email" type="email" name="email" required autocomplete="username" autofocus></div>
+      <div class="field"><label for="password">Password</label><input class="input" id="password" type="password" name="password" required autocomplete="current-password"></div>
+      <button class="btn block">Sign in</button>
+    </form>
+    <p class="mt muted">New here? <a href="/signup"><b>Create an account</b></a></p>
+    <% if (demo) { %><div class="demo"><b>Demo accounts</b><br>admin@fireclub.test / Admin@1234<br>officer@fireclub.test / Officer@1234<br>member@fireclub.test / Member@1234</div><% } %>
+  </div></div>
+</div>
+<%- include('../partials/bottom') %>

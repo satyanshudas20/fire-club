@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title ? title + ' · ' : '' %><%= club.club_name %></title>
+<meta name="description" content="<%= club.tagline %>">
+<meta name="theme-color" content="#04282b">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/css/style.css">
+<script src="/js/app.js" defer></script>
+</head>
+<% const nav = (href, ic, label, key) => `<a href="${href}" class="${active === key ? 'on' : ''}">${icon(ic)} ${label}</a>`; %>
+<body class="<%= user ? 'app' : 'pub' %>">
+<% if (user) { %>
+<div class="shell">
+  <aside class="sidebar" id="main-sidebar" aria-label="Main navigation">
+    <a href="/dashboard" class="brand"><span class="logo"><%- icon('flame', 22) %></span><%= club.club_name %></a>
+    <nav class="nav">
+      <%- nav('/dashboard', 'home', 'Dashboard', 'dashboard') %>
+      <%- nav('/events', 'calendar', 'Events', 'events') %>
+      <%- nav('/announcements', 'megaphone', 'Announcements', 'announcements') %>
+      <%- nav('/members', 'users', isOfficer ? 'Members' : 'Directory', 'members') %>
+      <%- nav('/gear', 'box', 'Gear library', 'gear') %>
+      <%- nav('/training', 'shield', 'Safety & training', 'training') %>
+      <%- nav('/billing', 'card', 'My billing', 'billing') %>
+      <% if (isAdmin) { %>
+      <h4>Admin</h4>
+      <%- nav('/billing/admin', 'chart', 'Finances', 'finance') %>
+      <%- nav('/admin/settings', 'settings', 'Club settings', 'settings') %>
+      <%- nav('/admin/audit', 'log', 'Audit log', 'audit') %>
+      <% } %>
+    </nav>
+    <div class="side-foot">
+      <a class="me" href="/profile" style="text-decoration:none">
+        <span class="avatar"><%= initials(user.name) %></span>
+        <span><b><%= user.name %></b><small><%= user.role %> · <%= user.plan_name || 'no plan' %></small></span>
+      </a>
+      <form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn ghost sm block" style="color:#b6e8dc;border-color:rgba(127,255,212,.25)"><%- icon('logout', 16) %> Sign out</button></form>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="btn ghost sm menu-btn" id="menu-btn" aria-label="Open menu" aria-controls="main-sidebar" aria-expanded="false"><%- icon('menu') %></button>
+      <strong class="muted"><%= club.tagline %></strong>
+      <button class="btn ghost sm" id="theme-toggle" aria-label="Toggle dark mode"><%- icon('moon') %></button>
+    </header>
+    <main class="content" id="main">
+<% } %>
+<% if (flash) { %><div class="flash <%= flash.type %>" role="status"><span><%= flash.msg %></span><a href="#" data-dismiss aria-label="Dismiss" style="text-decoration:none" onclick="return false"><%- icon('x', 16) %></a></div><% } %>

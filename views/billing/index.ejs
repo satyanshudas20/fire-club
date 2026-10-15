@@ -1,0 +1,16 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>My billing</h1><p>Current plan: <b><%= user.plan_name || 'None' %></b><%= user.plan_renews_at ? ' · renews ' + fmtDate(user.plan_renews_at) : '' %>
+  <% if (user.plan_renews_at && user.plan_renews_at < today) { %><span class="badge bad">Payment overdue</span><% } %></p></div></div>
+<div class="grid g4">
+<% plans.forEach(p => { const cur = p.id === user.plan_id; %>
+  <div class="card plan <%= cur ? 'current' : '' %>"><% if (cur) { %><span class="badge aqua" style="position:absolute;top:-10px;right:14px">Current</span><% } %>
+    <h3><%= p.name %></h3><div class="price"><%= p.interval === 'free' ? 'Free' : money(p.price_cents) %><small style="font-size:.9rem;font-weight:500"><%= p.interval === 'month' ? ' /mo' : p.interval === 'year' ? ' /yr' : '' %></small></div>
+    <p class="muted"><%= p.description %></p><ul><% p.perks.split('\n').filter(Boolean).forEach(x => { %><li><%- icon('check', 16) %> <%= x %></li><% }) %></ul>
+    <form method="post" action="/billing/subscribe/<%= p.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <button class="btn block <%= cur && p.interval === 'free' ? 'ghost' : '' %>" <%= cur && p.interval === 'free' ? 'disabled' : '' %>><%= cur ? (p.interval === 'free' ? 'Current plan' : 'Renew now') : p.interval === 'free' ? 'Downgrade' : 'Switch to ' + p.name %></button></form></div>
+<% }) %></div>
+<p class="muted mt"><small>Demo checkout: no real card is charged. Connect a payment provider in <code>routes/billing.js</code> to take real payments.</small></p>
+<div class="card mt"><h2>Payment history</h2>
+<% if (!payments.length) { %><div class="empty">No payments yet.</div><% } else { %><div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody>
+<% payments.forEach(p => { %><tr><td><%= fmtDate(p.created_at) %></td><td><%= p.note %> <small>(<%= p.plan_name || '—' %>)</small></td><td><%= money(p.amount_cents) %></td><td><span class="badge <%= p.status === 'paid' ? '' : 'bad' %>"><%= p.status %></span></td></tr><% }) %></tbody></table></div><% } %></div>
+<%- include('../partials/bottom') %>

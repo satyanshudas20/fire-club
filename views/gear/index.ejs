@@ -1,0 +1,30 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>Gear library</h1><p>Club props and safety kit. <%= isOfficer ? 'Check items out to members and track returns.' : 'Ask an officer to check items out to you.' %></p></div></div>
+<div class="card" style="padding:0;overflow:hidden"><div class="table-wrap"><table>
+  <thead><tr><th>Item</th><th>Category</th><th>Condition</th><th>Available</th><% if (isOfficer) { %><th>Actions</th><% } %></tr></thead><tbody>
+  <% items.forEach(g => { %><tr><td><b><%= g.name %></b><br><small><%= g.notes %></small></td><td><%= g.category %></td>
+    <td><span class="badge <%= ['repair','retired'].includes(g.condition) ? 'bad' : g.condition === 'fair' ? 'warn' : '' %>"><%= g.condition %></span></td>
+    <td><b><%= g.available %></b> / <%= g.total_qty %></td>
+    <% if (isOfficer) { %><td><details><summary class="btn ghost sm" style="display:inline-flex">Manage</summary>
+      <form method="post" action="/gear/<%= g.id %>/checkout" class="row mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <select name="user_id" style="width:auto" aria-label="Member"><% members.forEach(m => { %><option value="<%= m.id %>"><%= m.name %></option><% }) %></select>
+        <input class="input" type="number" name="qty" value="1" min="1" max="<%= g.available || 1 %>" style="width:70px" aria-label="Qty"><input class="input" type="date" name="due_at" style="width:auto" aria-label="Due"><button class="btn sm" <%= g.available ? '' : 'disabled' %>>Check out</button></form>
+      <form method="post" action="/gear/<%= g.id %>/update" class="row mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <input class="input" type="number" name="total_qty" value="<%= g.total_qty %>" min="1" style="width:70px" aria-label="Total"><select name="condition" style="width:auto"><% CONDS.forEach(c => { %><option <%= g.condition === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
+        <input class="input" name="notes" value="<%= g.notes %>" style="width:auto" aria-label="Notes"><button class="btn ghost sm">Save</button></form>
+      <form method="post" action="/gear/<%= g.id %>/delete" class="mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn danger sm" data-confirm="Remove <%= g.name %> from inventory?">Delete item</button></form></details></td><% } %></tr><% }) %>
+</tbody></table></div></div>
+
+<div class="card mt"><h2><%- icon('clock') %> <%= isOfficer ? 'Active loans' : 'My loans' %></h2>
+  <% if (!loans.length) { %><div class="empty">No gear currently out.</div><% } else { %><div class="table-wrap"><table><thead><tr><th>Item</th><% if (isOfficer) { %><th>Member</th><% } %><th>Out</th><th>Due</th><% if (isOfficer) { %><th></th><% } %></tr></thead><tbody>
+  <% loans.forEach(l => { %><tr><td><%= l.gear_name %> ×<%= l.qty %></td><% if (isOfficer) { %><td><%= l.user_name %></td><% } %><td><%= fmtDate(l.out_at.slice(0, 10)) %></td>
+    <td><span class="badge <%= l.due_at < today ? 'bad' : 'mute' %>"><%= l.due_at < today ? 'Overdue · ' : '' %><%= fmtDate(l.due_at) %></span></td>
+    <% if (isOfficer) { %><td class="right"><form method="post" action="/gear/loans/<%= l.id %>/return"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn sm">Mark returned</button></form></td><% } %></tr><% }) %></tbody></table></div><% } %></div>
+
+<% if (isOfficer) { %><details class="card mt"><summary><%- icon('plus') %> Add gear</summary>
+  <form method="post" action="/gear" class="form-grid mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field"><label>Name</label><input class="input" name="name" required></div><div class="field"><label>Category</label><input class="input" name="category" value="Props"></div>
+    <div class="field"><label>Quantity</label><input class="input" type="number" name="total_qty" value="1" min="1"></div>
+    <div class="field"><label>Condition</label><select name="condition"><% CONDS.forEach(c => { %><option <%= c === 'good' ? 'selected' : '' %>><%= c %></option><% }) %></select></div>
+    <div class="field full"><label>Notes</label><input class="input" name="notes"></div><div class="full"><button class="btn">Add to inventory</button></div></form></details><% } %>
+<%- include('../partials/bottom') %>

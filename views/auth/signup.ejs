@@ -1,0 +1,19 @@
+<%- include('../partials/top') %>
+<div class="auth-wrap">
+  <div class="auth-art"><div><%- icon('flame', 180) %><h1 class="mt" style="color:#fff">Join <%= club.club_name %></h1><p>Free to start. Upgrade any time.</p></div></div>
+  <div class="auth-form"><div class="box">
+    <a href="/" class="muted">← Back to home</a>
+    <h1 class="mt">Create your account</h1>
+    <% if (typeof error !== 'undefined' && error) { %><div class="err" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/signup">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <div class="field"><label for="name">Full name</label><input class="input" id="name" name="name" value="<%= form.name || '' %>" required maxlength="80" autocomplete="name"></div>
+      <div class="field"><label for="email">Email</label><input class="input" id="email" type="email" name="email" value="<%= form.email || '' %>" required autocomplete="email"></div>
+      <div class="field"><label for="password">Password <small>(8+ characters)</small></label><input class="input" id="password" type="password" name="password" required minlength="8" autocomplete="new-password"></div>
+      <div class="field"><label for="ec">Emergency contact <small>(name & phone — optional)</small></label><input class="input" id="ec" name="emergency_contact" maxlength="200"></div>
+      <button class="btn block">Create account</button>
+    </form>
+    <p class="mt muted">Already a member? <a href="/login"><b>Sign in</b></a></p>
+  </div></div>
+</div>
+<%- include('../partials/bottom') %>

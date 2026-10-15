@@ -1,0 +1,31 @@
+<%- include('../partials/top') %>
+<a href="/events" class="muted">← All events</a>
+<div class="page-head mt"><div><span class="badge aqua"><%= e.category %></span> <% if (e.members_only) { %><span class="badge mute">Paid members only</span><% } %>
+  <h1 class="mt"><%= e.title %></h1><p><%- icon('clock', 15) %> <%= fmtDateTime(e.starts_at) %><%= e.ends_at ? ' – ' + fmtTime(e.ends_at) : '' %> &nbsp; <%- icon('pin2', 15) %> <%= e.location || 'TBA' %></p></div>
+  <% if (isOfficer) { %><div class="row"><a class="btn ghost" href="/events/<%= e.id %>/edit"><%- icon('edit') %> Edit</a>
+    <form method="post" action="/events/<%= e.id %>/delete"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn danger" data-confirm="Delete this event and all RSVPs?"><%- icon('trash') %> Delete</button></form></div><% } %></div>
+<div class="grid g3">
+  <div class="card" style="grid-column:span 2"><h2>About</h2><p style="white-space:pre-wrap"><%= e.description || 'No description yet.' %></p></div>
+  <div class="card"><h2>Your spot</h2>
+    <p><b><%= e.going %></b><%= e.capacity ? ' / ' + e.capacity : '' %> going<%= e.capacity && e.going >= e.capacity ? ' · full' : '' %></p>
+    <% if (e.capacity) { %><div class="progress"><i style="width:<%= Math.min(100, Math.round(e.going / e.capacity * 100)) %>%"></i></div><% } %>
+    <div class="mt">
+    <% if (past) { %><span class="badge mute">This event has ended</span>
+    <% } else if (e.my_rsvp) { %><p><span class="badge <%= e.my_rsvp === 'going' ? '' : 'warn' %>"><%= e.my_rsvp === 'going' ? "You're going 🔥" : 'On the waitlist' %></span></p>
+      <form method="post" action="/events/<%= e.id %>/cancel"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn ghost block">Cancel RSVP</button></form>
+    <% } else { %><form method="post" action="/events/<%= e.id %>/rsvp"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn block"><%= e.capacity && e.going >= e.capacity ? 'Join waitlist' : 'RSVP' %></button></form><% } %></div></div>
+</div>
+<% if (isOfficer) { %>
+<div class="card mt" id="attendees"><div class="row between"><h2>Attendees (<%= attendees.length %>)</h2>
+  <a class="btn ghost sm" href="/events/<%= e.id %>/attendance.csv"><%- icon('download', 15) %> CSV</a></div>
+  <% if (!attendees.length) { %><div class="empty">No RSVPs yet.</div><% } else { %>
+  <div class="table-wrap"><table><thead><tr><th>Name</th><th>Status</th><th>Checked in</th><th></th></tr></thead><tbody>
+  <% attendees.forEach(a => { %><tr><td><a href="/members/<%= a.id %>"><b><%= a.name %></b></a><br><small><%= a.email %></small></td>
+    <td><span class="badge <%= a.status === 'going' ? '' : 'warn' %>"><%= a.status %></span></td>
+    <td><% if (a.status === 'going') { %><form method="post" action="/events/<%= e.id %>/checkin/<%= a.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn sm <%= a.checked_in ? '' : 'ghost' %>"><%- icon('check', 14) %> <%= a.checked_in ? 'Checked in' : 'Check in' %></button></form><% } %></td>
+    <td class="right"><form method="post" action="/events/<%= e.id %>/remove/<%= a.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn danger sm" aria-label="Remove <%= a.name %>"><%- icon('x', 14) %></button></form></td></tr><% }) %></tbody></table></div><% } %>
+  <% if (addable.length) { %><form method="post" action="/events/<%= e.id %>/add" class="row mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <select name="user_id" style="width:auto;min-width:220px" aria-label="Add attendee"><% addable.forEach(u => { %><option value="<%= u.id %>"><%= u.name %></option><% }) %></select><button class="btn sm"><%- icon('plus', 14) %> Add attendee</button></form><% } %>
+</div>
+<% } %>
+<%- include('../partials/bottom') %>

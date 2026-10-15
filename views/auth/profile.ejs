@@ -1,0 +1,15 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>My profile</h1><p><%= user.email %> · member since <%= fmtDate(user.joined_at) %></p></div></div>
+<div class="grid g2">
+  <form class="card" method="post" action="/profile"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><h2>Details</h2>
+    <div class="field"><label>Name</label><input class="input" name="name" value="<%= user.name %>" required maxlength="80"></div>
+    <div class="field"><label>Phone</label><input class="input" name="phone" value="<%= user.phone %>" maxlength="40"></div>
+    <div class="field"><label>Emergency contact</label><input class="input" name="emergency_contact" value="<%= user.emergency_contact %>" maxlength="200"></div>
+    <div class="field"><label>Bio</label><textarea name="bio" maxlength="500"><%= user.bio %></textarea></div>
+    <button class="btn">Save changes</button></form>
+  <form class="card" method="post" action="/profile/password" style="align-self:start"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><h2>Change password</h2>
+    <div class="field"><label>Current password</label><input class="input" type="password" name="current" required autocomplete="current-password"></div>
+    <div class="field"><label>New password</label><input class="input" type="password" name="password" required minlength="8" autocomplete="new-password"></div>
+    <button class="btn dark">Update password</button></form>
+</div>
+<%- include('../partials/bottom') %>

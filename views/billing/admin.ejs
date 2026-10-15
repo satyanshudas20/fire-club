@@ -1,0 +1,31 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>Finances</h1><p>Plans, subscribers, payments and overdue dues.</p></div><a class="btn ghost" href="/billing/admin/payments.csv"><%- icon('download') %> Export payments</a></div>
+<div class="grid g3 mb">
+  <div class="card stat"><div class="num"><%= money(mrr) %></div><div class="lbl">Monthly recurring revenue</div></div>
+  <div class="card stat"><div class="num"><%= money(paid) %></div><div class="lbl">Total collected</div></div>
+  <div class="card stat"><div class="num"><%= overdue.length %></div><div class="lbl">Overdue members</div></div>
+</div>
+<div class="card"><h2>Plans</h2><div class="table-wrap"><table><thead><tr><th>Plan</th><th>Price</th><th>Subscribers</th><th>Status</th><th></th></tr></thead><tbody>
+<% plans.forEach(p => { %><tr><td><b><%= p.name %></b><br><small><%= p.description %></small></td><td><%= p.interval === 'free' ? 'Free' : money(p.price_cents) + ' / ' + p.interval %></td><td><%= p.subscribers %></td>
+  <td><span class="badge <%= p.active ? '' : 'mute' %>"><%= p.active ? 'Visible' : 'Hidden' %></span></td>
+  <td class="right"><form method="post" action="/billing/admin/plans/<%= p.id %>/toggle"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn ghost sm"><%= p.active ? 'Hide' : 'Show' %></button></form></td></tr><% }) %></tbody></table></div>
+  <details class="mt"><summary class="btn ghost sm" style="display:inline-flex"><%- icon('plus', 14) %> New plan</summary>
+  <form method="post" action="/billing/admin/plans" class="form-grid mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field"><label>Name</label><input class="input" name="name" required></div>
+    <div class="field"><label>Price (USD)</label><input class="input" type="number" step="0.01" min="0" name="price" value="0"></div>
+    <div class="field"><label>Billing</label><select name="interval"><option value="month">Monthly</option><option value="year">Yearly</option><option value="free">Free</option></select></div>
+    <div class="field"><label>Short description</label><input class="input" name="description"></div>
+    <div class="field full"><label>Perks <small>(one per line)</small></label><textarea name="perks"></textarea></div><div class="full"><button class="btn">Create plan</button></div></form></details></div>
+<div class="grid g2 mt">
+  <div class="card"><h2>Overdue dues</h2><% if (!overdue.length) { %><div class="empty">Everyone is paid up 🎉</div><% } %><div class="list">
+    <% overdue.forEach(o => { %><div class="row between"><a href="/members/<%= o.id %>"><b><%= o.name %></b></a><span class="badge bad"><%= o.plan_name %> · <%= money(o.price_cents) %> · since <%= fmtDate(o.plan_renews_at) %></span></div><% }) %></div></div>
+  <form class="card" method="post" action="/billing/admin/payments"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><h2>Record manual payment</h2>
+    <div class="field"><label>Member</label><select name="user_id"><% members.forEach(m => { %><option value="<%= m.id %>"><%= m.name %></option><% }) %></select></div>
+    <div class="row"><div class="grow field"><label>Amount (USD)</label><input class="input" type="number" step="0.01" min="0.01" name="amount" required></div>
+      <div class="field"><label>Method</label><select name="method"><option>cash</option><option>bank</option><option>other</option></select></div></div>
+    <div class="field"><label>Note</label><input class="input" name="note" placeholder="e.g. Cash at Friday jam"></div>
+    <label class="check field"><input type="checkbox" name="extend" checked> Extend plan renewal date</label><button class="btn">Record payment</button></form>
+</div>
+<div class="card mt"><h2>Latest payments</h2><div class="table-wrap"><table><thead><tr><th>Date</th><th>Member</th><th>Plan</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead><tbody>
+<% payments.forEach(p => { %><tr><td><%= fmtDate(p.created_at) %></td><td><%= p.name %></td><td><%= p.plan_name || '—' %></td><td><%= money(p.amount_cents) %></td><td><%= p.method %></td><td><span class="badge <%= p.status === 'paid' ? '' : 'bad' %>"><%= p.status %></span></td></tr><% }) %></tbody></table></div></div>
+<%- include('../partials/bottom') %>

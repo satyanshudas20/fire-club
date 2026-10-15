@@ -1,0 +1,5 @@
+<%- include('partials/top') %>
+<% if (!user) { %><%- include('partials/pubnav') %><% } %>
+<div class="errpage"><div><div class="code"><%= code %></div><h1><%= title %></h1><p class="muted"><%= message %></p>
+<a class="btn" href="<%= user ? '/dashboard' : '/' %>">Back to safety</a></div></div>
+<%- include('partials/bottom') %>

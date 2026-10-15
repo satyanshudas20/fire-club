@@ -1,0 +1,19 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1>Events</h1><p>Workshops, practice sessions and performances.</p></div>
+  <% if (isOfficer) { %><a class="btn" href="/events/new"><%- icon('plus') %> New event</a><% } %></div>
+<div class="row between mb">
+  <div class="tabs"><a href="/events" class="<%= past ? '' : 'on' %>">Upcoming</a><a href="/events?view=past" class="<%= past ? 'on' : '' %>">Past</a></div>
+  <div class="tabs"><a href="?<%= past ? 'view=past' : '' %>" class="<%= cat ? '' : 'on' %>">All</a><% CATS.forEach(c => { %><a href="?<%= past ? 'view=past&' : '' %>cat=<%= c %>" class="<%= cat === c ? 'on' : '' %>"><%= c %></a><% }) %></div>
+</div>
+<% if (!events.length) { %><div class="card empty">No <%= past ? 'past' : 'upcoming' %> events<%= cat ? ' in ' + cat : '' %>.</div><% } %>
+<div class="grid g2">
+<% events.forEach(e => { const d = new Date(e.starts_at); const full = e.capacity && e.going >= e.capacity; %>
+  <a href="/events/<%= e.id %>" class="card row" style="text-decoration:none;align-items:flex-start;flex-wrap:nowrap">
+    <div class="datebox"><b><%= d.getDate() %></b><span><%= d.toLocaleString('en', { month: 'short' }) %></span></div>
+    <div class="grow"><div class="row" style="gap:.4rem"><span class="badge aqua"><%= e.category %></span><% if (e.members_only) { %><span class="badge mute">Members</span><% } %><% if (e.my_rsvp) { %><span class="badge <%= e.my_rsvp === 'going' ? '' : 'warn' %>"><%- icon('check', 12) %> <%= e.my_rsvp %></span><% } %></div>
+      <h3 style="margin-top:.4rem"><%= e.title %></h3>
+      <small><%= fmtTime(e.starts_at) %> · <%= e.location || 'TBA' %></small>
+      <% if (e.capacity) { %><div class="progress mt" title="<%= e.going %> of <%= e.capacity %> spots"><i style="width:<%= Math.min(100, Math.round(e.going / e.capacity * 100)) %>%"></i></div><small><%= full ? 'Full — waitlist open' : (e.capacity - e.going) + ' spots left' %></small>
+      <% } else { %><br><small><%= e.going %> going</small><% } %></div></a>
+<% }) %></div>
+<%- include('../partials/bottom') %>

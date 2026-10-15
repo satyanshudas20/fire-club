@@ -1,0 +1,35 @@
+<%- include('../partials/top') %>
+<div class="page-head"><div><h1><%= isOfficer ? 'Members' : 'Member directory' %></h1><p><%= total %> people</p></div>
+  <% if (isOfficer) { %><a class="btn ghost" href="/members/export.csv"><%- icon('download') %> Export CSV</a><% } %></div>
+<form class="card flat row mb" method="get">
+  <div class="grow" style="min-width:200px"><input class="input" name="q" placeholder="Search name or email…" value="<%= q.q || '' %>" aria-label="Search"></div>
+  <% if (isOfficer) { %>
+  <select name="role" style="width:auto" aria-label="Role"><option value="">Any role</option><% ['admin','officer','member'].forEach(r => { %><option <%= q.role === r ? 'selected' : '' %>><%= r %></option><% }) %></select>
+  <select name="status" style="width:auto" aria-label="Status"><option value="">Any status</option><% ['active','suspended'].forEach(r => { %><option <%= q.status === r ? 'selected' : '' %>><%= r %></option><% }) %></select>
+  <select name="plan" style="width:auto" aria-label="Plan"><option value="">Any plan</option><% plans.forEach(p => { %><option value="<%= p.id %>" <%= q.plan == p.id ? 'selected' : '' %>><%= p.name %></option><% }) %></select>
+  <% } %>
+  <button class="btn"><%- icon('search') %> Filter</button>
+</form>
+<div class="card" style="padding:0"><div class="table-wrap"><table>
+  <thead><tr><th>Member</th><th>Role</th><% if (isOfficer) { %><th>Plan</th><th>Renews</th><th>Status</th><% } %></tr></thead><tbody>
+  <% members.forEach(m => { const overdue = m.price_cents > 0 && m.plan_renews_at && m.plan_renews_at < today; %>
+  <tr><td><div class="row"><span class="avatar sm"><%= initials(m.name) %></span><div>
+      <% if (isOfficer) { %><a href="/members/<%= m.id %>"><b><%= m.name %></b></a><br><small><%= m.email %></small><% } else { %><b><%= m.name %></b><br><small><%= m.bio ? m.bio.slice(0, 60) : 'Member since ' + fmtDate(m.joined_at) %></small><% } %></div></div></td>
+    <td><span class="badge <%= m.role === 'member' ? 'mute' : 'aqua' %>"><%= m.role %></span></td>
+    <% if (isOfficer) { %><td><%= m.plan_name || '—' %></td><td><% if (m.plan_renews_at) { %><span class="<%= overdue ? 'badge bad' : '' %>"><%= overdue ? 'Overdue · ' : '' %><%= fmtDate(m.plan_renews_at) %></span><% } else { %>—<% } %></td>
+    <td><span class="badge <%= m.status === 'active' ? '' : 'bad' %>"><%= m.status %></span></td><% } %></tr>
+  <% }) %>
+  <% if (!members.length) { %><tr><td colspan="5" class="empty">No members match.</td></tr><% } %>
+</tbody></table></div></div>
+<%- include('../partials/pager') %>
+<% if (isAdmin) { %>
+<details class="card mt"><summary><%- icon('plus') %> Add a member manually</summary>
+  <form method="post" action="/members/new" class="form-grid mt"><input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <div class="field"><label>Name</label><input class="input" name="name" required></div>
+    <div class="field"><label>Email</label><input class="input" type="email" name="email" required></div>
+    <div class="field"><label>Temporary password</label><input class="input" name="password" minlength="8" required></div>
+    <div class="field"><label>Role</label><select name="role"><option>member</option><option>officer</option><option>admin</option></select></div>
+    <div class="field"><label>Plan</label><select name="plan_id"><% plans.forEach(p => { %><option value="<%= p.id %>"><%= p.name %></option><% }) %></select></div>
+    <div class="field" style="align-self:end"><button class="btn">Create member</button></div></form></details>
+<% } %>
+<%- include('../partials/bottom') %>

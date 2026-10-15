@@ -1,0 +1,45 @@
+<%- include('partials/top') %>
+<% const over = true; %>
+<div class="hero">
+  <%- include('partials/pubnav', { over: true }) %>
+  <div class="inner" style="margin-top:3rem">
+    <div>
+      <span class="badge aqua"><%- icon('flame', 14) %> <%= stats.members %> members and growing</span>
+      <h1 class="mt">Where the community <em>burns bright</em> — safely.</h1>
+      <p class="lead"><%= club.about %></p>
+      <div class="row mt"><a class="btn" href="/signup">Join the club</a><a class="btn ghost" style="color:#fff;border-color:rgba(255,255,255,.35)" href="#plans">See membership plans</a></div>
+    </div>
+    <div class="flame"><svg viewBox="0 0 64 64" fill="none" stroke="#7fffd4" stroke-width="1.6" stroke-linejoin="round"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b9ffe9"/><stop offset="1" stop-color="#1fb99a"/></linearGradient></defs><path fill="url(#g)" d="M32 4c3 10 15 15 15 30a15 15 0 0 1-30 0c0-6 2-10 5-13 .6 4.500 3 6.500 5 7.500C26 20 29 13 32 4Z"/><path fill="#04282b" fill-opacity=".45" stroke="none" d="M32 60a9 9 0 0 0 9-9c0-5.500-4.500-7.500-9-12-4.500 4.500-9 6.500-9 12a9 9 0 0 0 9 9Z"/></svg></div>
+  </div>
+</div>
+<svg class="wave" viewBox="0 0 1440 60" preserveAspectRatio="none" fill="currentColor"><path d="M0 0c240 50 480 60 720 30S1200-10 1440 30V60H0Z" transform="scale(1,-1) translate(0,-60)" opacity="0"/><path d="M0 60V20c200 30 420 30 720 5s560-25 720 0v35Z"/></svg>
+
+<section class="section">
+  <div class="grid g3">
+    <div class="feat"><span class="ic"><%- icon('calendar', 22) %></span><div><h3>Events & RSVPs</h3><p class="muted">Workshops, jams and performances with capacity limits, waitlists and QR-free check-in.</p></div></div>
+    <div class="feat"><span class="ic"><%- icon('shield', 22) %></span><div><h3>Safety first</h3><p class="muted">Track fire-safety certifications and get reminded before they expire.</p></div></div>
+    <div class="feat"><span class="ic"><%- icon('box', 22) %></span><div><h3>Gear library</h3><p class="muted">Borrow props and safety kit with clear due dates and return tracking.</p></div></div>
+  </div>
+</section>
+
+<% if (events.length) { %>
+<section class="section" style="padding-top:0"><h2>Upcoming open events</h2>
+  <div class="grid g3 mt">
+  <% events.forEach(e => { %>
+    <div class="card"><span class="badge aqua"><%= e.category %></span>
+      <h3 class="mt"><%= e.title %></h3><p class="muted"><%- icon('clock', 15) %> <%= fmtDateTime(e.starts_at) %><br><%- icon('pin2', 15) %> <%= e.location %></p>
+      <a class="btn ghost sm" href="/signup">Join to RSVP</a></div>
+  <% }) %></div></section>
+<% } %>
+
+<section class="section" id="plans"><h2>Membership plans</h2><p class="muted">Start free. Upgrade when you're hooked.</p>
+  <div class="grid g4 mt">
+  <% plans.forEach(p => { %>
+    <div class="card plan"><h3><%= p.name %></h3>
+      <div class="price"><%= p.interval === 'free' ? 'Free' : money(p.price_cents) %><small style="font-size:.9rem;font-weight:500"><%= p.interval === 'month' ? ' /mo' : p.interval === 'year' ? ' /yr' : '' %></small></div>
+      <p class="muted"><%= p.description %></p>
+      <ul><% p.perks.split('\n').filter(Boolean).forEach(x => { %><li><%- icon('check', 16) %> <%= x %></li><% }) %></ul>
+      <a class="btn <%= p.interval === 'free' ? 'ghost' : '' %>" href="/signup">Choose <%= p.name %></a></div>
+  <% }) %></div></section>
+<footer class="foot"><%= club.club_name %> · <%= club.location %> · <a href="mailto:<%= club.contact_email %>"><%= club.contact_email %></a></footer>
+<%- include('partials/bottom') %>

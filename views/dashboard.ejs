@@ -1,0 +1,63 @@
+<%- include('partials/top') %>
+<div class="page-head"><div><h1>Hello, <%= user.name.split(' ')[0] %> 👋</h1><p><%= fmtDate(new Date().toISOString()) %> · <%= user.plan_name || 'No plan' %> plan</p></div>
+  <div class="row"><a class="btn" href="/events"><%- icon('calendar') %> Browse events</a></div></div>
+
+<% if (missingRequired.length) { %><div class="flash error" style="display:block"><b>Safety certification needed:</b> <%= missingRequired.map(m => m.title).join(', ') %>. You can't take part in fire activities until it's valid — <a href="/training"><u>see training</u></a>.</div><% } %>
+
+<% if (typeof stats !== 'undefined') { %>
+<div class="grid g4 mb">
+  <div class="card stat"><div class="num"><%= stats.members %></div><div class="lbl">Active members <span class="badge">+<%= stats.newMonth %> / 30d</span></div></div>
+  <div class="card stat"><div class="num"><%= money(stats.mrr) %></div><div class="lbl">Monthly recurring revenue</div></div>
+  <div class="card stat"><div class="num"><%= stats.upcoming %></div><div class="lbl">Upcoming events</div></div>
+  <div class="card stat"><div class="num"><%= stats.gearOut %></div><div class="lbl">Gear out <% if (stats.overdueLoans) { %><span class="badge bad"><%= stats.overdueLoans %> overdue</span><% } %></div></div>
+</div>
+<div class="grid g3 mb">
+  <div class="card" style="grid-column:span 2"><div class="row between"><h2><%- icon('chart') %> Last 6 months</h2>
+    <div class="legend"><span>Bars: new members</span><span>Revenue shown below</span></div></div>
+    <% const maxS = Math.max(1, ...chart.map(c => c.signups)); %>
+    <div class="chart" role="img" aria-label="New members per month">
+      <% chart.forEach(c => { %><div class="col" title="<%= c.signups %> signups, <%= money(c.revenue) %>"><b style="color:var(--ink)"><%= c.signups %></b><div class="bar" style="height:<%= Math.round(c.signups / maxS * 100) %>%"></div><span><%= c.label %></span><small><%= money(c.revenue) %></small></div><% }) %>
+    </div></div>
+  <div class="card"><h2>Needs attention</h2><div class="list">
+    <div class="row between"><span>Overdue dues</span><span class="badge <%= stats.overdueDues ? 'bad' : '' %>"><%= stats.overdueDues %></span></div>
+    <div class="row between"><span>Certs expiring in 30d</span><span class="badge <%= stats.expiring ? 'warn' : '' %>"><%= stats.expiring %></span></div>
+    <div class="row between"><span>Overdue gear loans</span><span class="badge <%= stats.overdueLoans ? 'bad' : '' %>"><%= stats.overdueLoans %></span></div>
+  </div>
+  <% if (isAdmin) { %><a class="btn ghost sm mt" href="/billing/admin">Open finances</a><% } %></div>
+</div>
+<% } %>
+
+<div class="grid g2">
+  <div class="card"><h2><%- icon('calendar') %> Upcoming events</h2>
+    <% if (!upcoming.length) { %><div class="empty">Nothing scheduled yet.</div><% } %>
+    <div class="list"><% upcoming.forEach(e => { const d = new Date(e.starts_at); %>
+      <a href="/events/<%= e.id %>" class="row" style="text-decoration:none">
+        <div class="datebox"><b><%= d.getDate() %></b><span><%= d.toLocaleString('en', { month: 'short' }) %></span></div>
+        <div class="grow"><b><%= e.title %></b><br><small><%= fmtTime(e.starts_at) %> · <%= e.location %></small></div>
+        <span class="badge mute"><%= e.going %><%= e.capacity ? '/' + e.capacity : '' %> going</span></a><% }) %></div>
+    <a class="btn ghost sm mt" href="/events">All events</a></div>
+
+  <div class="card"><h2><%- icon('megaphone') %> Announcements</h2>
+    <% if (!announcements.length) { %><div class="empty">No announcements.</div><% } %>
+    <div class="list"><% announcements.forEach(a => { %><div><b><%= a.pinned ? '📌 ' : '' %><%= a.title %></b><p class="muted" style="margin:.2rem 0 0"><%= a.body.length > 140 ? a.body.slice(0, 140) + '…' : a.body %></p></div><% }) %></div>
+    <a class="btn ghost sm mt" href="/announcements">All announcements</a></div>
+
+  <div class="card"><h2><%- icon('shield') %> My certifications</h2>
+    <% if (!myCerts.length) { %><div class="empty">No certifications yet.</div><% } %>
+    <div class="list"><% myCerts.forEach(c => { const exp = c.expires_at && c.expires_at < dateOnly(); const soon = c.expires_at && !exp && c.expires_at <= dateOnly(30); %>
+      <div class="row between"><span><%= c.title %></span><span class="badge <%= exp ? 'bad' : soon ? 'warn' : '' %>"><%= exp ? 'Expired' : c.expires_at ? 'Valid to ' + fmtDate(c.expires_at) : 'No expiry' %></span></div><% }) %></div></div>
+
+  <div class="card"><h2><%- icon('box') %> My gear & my RSVPs</h2>
+    <% if (!myLoans.length && !myEvents.length) { %><div class="empty">Nothing borrowed or booked.</div><% } %>
+    <div class="list">
+      <% myLoans.forEach(l => { %><div class="row between"><span><%= l.name %> ×<%= l.qty %></span><span class="badge <%= l.due_at < dateOnly() ? 'bad' : 'mute' %>">Due <%= fmtDate(l.due_at) %></span></div><% }) %>
+      <% myEvents.forEach(e => { %><div class="row between"><a href="/events/<%= e.id %>"><%= e.title %></a><span class="badge <%= e.rsvp === 'going' ? '' : 'warn' %>"><%= e.rsvp %> · <%= fmtDate(e.starts_at) %></span></div><% }) %>
+    </div></div>
+</div>
+
+<% if (typeof recentPayments !== 'undefined' && recentPayments.length) { %>
+<div class="card mt"><h2>Recent payments</h2><div class="table-wrap"><table><tbody>
+  <% recentPayments.forEach(p => { %><tr><td><%= p.name %></td><td><%= p.note %></td><td><%= money(p.amount_cents) %></td><td><span class="badge <%= p.status === 'paid' ? '' : 'bad' %>"><%= p.status %></span></td><td class="muted"><%= fmtDate(p.created_at) %></td></tr><% }) %>
+</tbody></table></div></div>
+<% } %>
+<%- include('partials/bottom') %>

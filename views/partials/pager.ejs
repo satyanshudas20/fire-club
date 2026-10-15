@@ -1,0 +1,5 @@
+<% if (pages > 1) { const qs = Object.entries(q).filter(([k, v]) => k !== 'page' && v).map(([k, v]) => k + '=' + encodeURIComponent(v)).join('&'); %>
+<div class="pager">
+  <% for (let i = 1; i <= pages; i++) { %><a class="btn sm <%= i === page ? '' : 'ghost' %>" href="?<%= qs %>&page=<%= i %>"><%= i %></a><% } %>
+</div>
+<% } %>
